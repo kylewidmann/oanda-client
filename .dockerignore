@@ -1,0 +1,8 @@
+.coverage
+.mypy_cache
+.pytest_cache
+.venv
+docker
+*.code-workspace
+.dockerignore
+htmlcov
