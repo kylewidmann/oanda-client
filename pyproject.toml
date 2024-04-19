@@ -10,6 +10,8 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
+v20 = {path = "vendors/v20-python"}
+fx-lib = {path = "vendors/fx-lib"}
 
 
 [tool.poetry.group.dev.dependencies]
