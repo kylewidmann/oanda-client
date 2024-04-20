@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": ".",
+			"name": "oanda-client"
+		},
+		{
+			"path": "../fx-lib",
+			"name": "libs/fx-lib"
+		},
+		{
+			"path": "../v20-python",
+			"name": "libs/v20-python"
+		}
+	],
+	"settings": {}
+}

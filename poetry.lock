@@ -205,8 +205,10 @@ develop = false
 pytest = "^8.1.1"
 
 [package.source]
-type = "directory"
-url = "vendors/fx-lib"
+type = "git"
+url = "https://github.com/kylewidmann/fx-lib.git"
+reference = "0.1.0"
+resolved_reference = "51b25f113cdae76c2e28ff9f5bbaa1cb1d9eafbf"
 
 [[package]]
 name = "iniconfig"
@@ -600,10 +602,12 @@ files = []
 develop = false
 
 [package.source]
-type = "directory"
-url = "vendors/v20-python"
+type = "git"
+url = "https://github.com/kylewidmann/v20-python.git"
+reference = "0.1.0"
+resolved_reference = "5350fceb16129ba5da1331e505d1df8f3ddf1a7c"
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "ccee9d380baa662f1cb7ca808712a2ce67bcd73d69abf1f2c6ee837aaae4e8c9"
+content-hash = "1ee811c1838c2adb1b5be40bdff5c6ac9eeea72dc3bfadfd546cd3989bb68965"

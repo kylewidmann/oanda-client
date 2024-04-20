@@ -1,6 +1,0 @@
-[submodule "vendors/v20-python"]
-	path = vendors/v20-python
-	url = https://github.com/kylewidmann/v20-python.git
-[submodule "vendors/fx-lib"]
-	path = vendors/fx-lib
-	url = https://github.com/kylewidmann/fx-lib.git

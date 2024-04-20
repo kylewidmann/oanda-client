@@ -45,6 +45,7 @@ class Oanda:
             elif msg_type == "pricing.ClientPrice":
                 print(price_to_string(msg))
 
+
     def get_candle(self, instrument: Instrument, granularity: Granularity) -> Candlestick:
         print(f"Get candle for {instrument}")
         response = self.api.pricing.candles(
