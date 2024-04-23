@@ -12,6 +12,7 @@ packages = [
 python = "^3.10"
 fx-lib = {git = "https://github.com/kylewidmann/fx-lib.git", rev = "0.1.0"}
 v20 = {git = "https://github.com/kylewidmann/v20-python.git", rev = "0.1.0"}
+requests = "^2.31.0"
 
 
 [tool.poetry.group.dev.dependencies]
