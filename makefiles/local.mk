@@ -33,10 +33,15 @@ mypy-local:
 lint-local: ##@lint Run lint tools
 lint-local: bandit-local black-local flake8-local isort-local mypy-local
 
+.PHONY: clean-imports
+clean-imports: ##@local Remove unused imports
+clean-imports: 
+	autoflake --in-place --remove-all-unused-imports --recursive oanda_client tests
+
 .PHONY: reformat
 reformat: ##@local Reformat module
 reformat: files ?= ${SERVICE} tests
-reformat:
+reformat: clean-imports
 	${POETRY} run isort --overwrite-in-place ${files}
 	${POETRY} run black ${files}
 

@@ -1,91 +1,259 @@
 import asyncio
-from datetime import datetime
+import os
 import sys
-from typing import Callable
+from abc import abstractmethod
+from datetime import datetime, timezone
+from typing import Callable, Tuple
+
+import pandas as pd
+from pytrade.instruments import (
+    MINUTES_MAP,
+    Candlestick,
+    FxInstrument,
+    Granularity,
+    Instrument,
+)
+from pytrade.interfaces.account import IAccount
+from pytrade.interfaces.client import IClient
+from pytrade.models import Order
+from v20.account import Account
+from v20.instrument import Candlestick as v20Candlestick
+from v20.order import MarketOrderRequest  # type: ignore
+from v20.position import Position as v20Position
+
 from oanda_client.config import Config
-from v20.instrument import Candlestick
-from fx_lib.models.instruments import Instrument
-from fx_lib.models.granularity import Granularity
+from oanda_client.events import CandlestickEvent
+from oanda_client.models import Position
+
 
 def price_to_string(price):
     return "{} ({}) {}/{}".format(
-        price.instrument,
-        price.time,
-        price.bids[0].price,
-        price.asks[0].price
+        price.instrument, price.time, price.bids[0].price, price.asks[0].price
     )
 
 
 def heartbeat_to_string(heartbeat):
-    return "HEARTBEAT ({})".format(
-        heartbeat.time
-    )
+    return "HEARTBEAT ({})".format(heartbeat.time)
 
-class Oanda:
 
-    def __init__(self, config: Config):
-        self.config = config
-        self.api = config.create_context()
-        self.stream_api = config.create_streaming_context()
+class OandaAccount(IAccount):
 
-    # def buy(self):
-    #     self.api.order.limit()
+    def __init__(self, v20Account: Account):
+        self._account = v20Account
 
-    def stream(self, instruments: list[str]):
-        response = self.stream_api.pricing.stream(
-            accountID=self.config.active_account,
-            snapshot=True,
-            instruments=','.join(instruments)
+    @property
+    def equity(self) -> float:
+        return self._account.NAV
+
+    @property
+    def margin_available(self) -> float:
+        return self._account.marginAvailable
+
+    @property
+    def leverage(self) -> float:
+        return self._account.marginRate
+
+
+class Oanda(IClient):
+
+    def __init__(self, config_path: str = "~/.v20.conf"):
+
+        if not os.path.exists(os.path.expanduser(config_path)):
+            raise RuntimeError(
+                f"Oanda configuraton file does not exist at {config_path}"
+            )
+
+        self._config = Config()
+        self._config.load("~/.v20.conf")
+        self._api = self._config.create_context()
+        self._stream_api = self._config.create_streaming_context()
+        self._candle_events: dict[Tuple[Instrument, Granularity], CandlestickEvent] = (
+            dict()
         )
+        self._stream_tasks: list[asyncio.Task] = []
 
-        for msg_type, msg in response.parts():
-            print(msg_type)
-            if msg_type == "pricing.Heartbeat":
-                print(heartbeat_to_string(msg))
-            elif msg_type == "pricing.ClientPrice":
-                print(price_to_string(msg))
+    @property
+    def account(self) -> IAccount:
+        response = self._api.account.get(self._config.active_account)
+        return OandaAccount(response.body.get("account"))
 
+    @abstractmethod
+    def order(self, order: Order):
 
-    def get_candle(self, instrument: Instrument, granularity: Granularity) -> Candlestick:
-        print(f"Get candle for {instrument}")
-        response = self.api.pricing.candles(
-            accountID = self.config.active_account,
-            instrument = instrument.value,
+        if not isinstance(order.instrument, FxInstrument):
+            raise RuntimeError(
+                f"Oanda only supports order for Forex pairs.  Received {order.instrument}"
+            )
+
+        _instrument: FxInstrument = order.instrument
+
+        order_args = {
+            "instrument": _instrument.value.replace("/", "_"),
+            "units": order.size,
+            "takeProfitOnfill": {"price": order.take_profit_on_fill},
+            "stopLossOnFill": {"price": order.stop_loss_on_fill},
+        }
+        order_request = MarketOrderRequest(**order_args)
+        response = self._api.order.create(
+            self._config.active_account, order=order_request
+        )
+        if response.body and response.body.get("errorMessage"):
+            raise RuntimeError(response.body.get("errorMessage"))
+
+    @abstractmethod
+    def get_position(self, instrument: Instrument) -> Position:
+
+        if isinstance(instrument, str):
+            raise RuntimeError(
+                f"Oanda only support Forex instruments.  Received {instrument}"
+            )
+
+        _instrument: FxInstrument = instrument
+
+        response = self._api.position.get(
+            self._config.active_account, _instrument.value.replace("/", "_")
+        )
+        position: v20Position = response.body.get("position")
+        return Position(instrument, position)
+
+    @abstractmethod
+    def close_position(self, instrument: Instrument):
+
+        if isinstance(instrument, str):
+            raise RuntimeError(
+                f"Oanda only support Forex instruments.  Received {instrument}"
+            )
+
+        _instrument: FxInstrument = instrument
+
+        response = self._api.position.close(
+            self._config.active_account, _instrument.value.replace("/", "_")
+        )
+        if response.body.get("errorMessage"):
+            raise RuntimeError(response.body.get("errorMessage"))
+
+    def get_candles(
+        self, instrument: Instrument, granularity: Granularity, count: int
+    ) -> list[Candlestick]:
+
+        if isinstance(instrument, str):
+            raise RuntimeError(
+                f"Oanda only support Forex instruments.  Received {instrument}"
+            )
+
+        _instrument: FxInstrument = instrument
+
+        response = self._api.instrument.candles(
+            accountID=self._config.active_account,
+            instrument=_instrument.value.replace("/", "_"),
             price="B",
             granularity=granularity.value,
-            count=2
+            count=count + 1,
         )
 
-        if response.body:
-            candles: list[Candlestick] = response.body.get("candles")
-            completed_candles = [candle for candle in candles if candle.complete]
-            return completed_candles[-1]
+        if not response.body:
+            raise RuntimeError()
 
-    async def _stream_candles(self, instrument: Instrument, granularity: Granularity, callback: Callable[[Instrument, Granularity, Candlestick], None]):
+        v20candles: list[v20Candlestick] = response.body.get("candles")
+        completed_candles = [candle for candle in v20candles if candle.complete]
+        candles = [
+            Candlestick(
+                _instrument,
+                granularity,
+                c.bid.o,
+                c.bid.h,
+                c.bid.l,
+                c.bid.c,
+                pd.Timestamp(c.time),
+            )
+            for c in completed_candles
+        ]
+        return candles[-count:]
+
+    def get_candle(
+        self, instrument: Instrument, granularity: Granularity
+    ) -> Candlestick:
+
+        if isinstance(instrument, str):
+            raise RuntimeError(
+                f"Oanda only support Forex instruments.  Received {instrument}"
+            )
+
+        _instrument: FxInstrument = instrument
+
+        response = self._api.instrument.candles(
+            accountID=self._config.active_account,
+            instrument=_instrument.value.replace("/", "_"),
+            price="B",
+            granularity=granularity.value,
+            count=2,
+        )
+
+        if not response.body:
+            raise RuntimeError()
+
+        candles: list[v20Candlestick] = response.body.get("candles")
+        completed_candles = [candle for candle in candles if candle.complete]
+        last_candle = completed_candles[-1]
+        _bid = last_candle.bid
+        return Candlestick(
+            _instrument,
+            granularity,
+            _bid.o,
+            _bid.h,
+            _bid.l,
+            _bid.c,
+            pd.Timestamp(last_candle.time),
+        )
+
+    def subscribe(
+        self,
+        instrument: Instrument,
+        granularity: Granularity,
+        callback: Callable[[Candlestick], None],
+    ):
+        key = (instrument, granularity)
+        if key in self._candle_events:
+            self._candle_events[key] += callback
+        else:
+            candle_event = CandlestickEvent()
+            self._candle_events[key] = candle_event
+            candle_event += callback
+            stream_task = asyncio.create_task(
+                self._stream_candles(instrument, granularity, callback)
+            )
+            self._stream_tasks.append(stream_task)
+
+    async def _stream_candles(
+        self,
+        instrument: Instrument,
+        granularity: Granularity,
+        callback: Callable[[Candlestick], None],
+    ):
         try:
-            interval = 1*60
+            interval = 60 * MINUTES_MAP[granularity]
             previous_candle = None
             candle = self.get_candle(instrument, granularity)
             previous_candle = candle
-            initial_delay = (2 * interval) - ((datetime.utcnow() - datetime.strptime(candle.time[:19], "%Y-%m-%dT%H:%M:%S")).seconds)
-            callback(instrument, granularity, candle)
+            initial_delay = (2 * interval) - (
+                (datetime.now(timezone.utc) - candle.timestamp).seconds
+            )
+            callback(candle)
             await asyncio.sleep(initial_delay)
             while True:
                 candle = self.get_candle(instrument, granularity)
-                
+
                 # Handle clase where we grab previous candle again
-                if candle.time == previous_candle.time:
-                    await asyncio.sleep(10)
+                if candle.timestamp == previous_candle.timestamp:
+                    await asyncio.sleep(1)
                     continue
 
                 previous_candle = candle
-                callback(instrument, granularity, candle)
+                callback(candle)
                 await asyncio.sleep(interval)
-                
+
         except asyncio.CancelledError:
             pass
         except Exception as err:
             print(err)
             sys.exit(1)
-
-

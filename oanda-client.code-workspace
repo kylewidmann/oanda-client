@@ -5,11 +5,11 @@
 			"name": "oanda-client"
 		},
 		{
-			"path": "../fx-lib",
-			"name": "libs/fx-lib"
+			"path": "libs/PyTrade",
+			"name": "libs/PyTrade"
 		},
 		{
-			"path": "../v20-python",
+			"path": "libs/v20-python",
 			"name": "libs/v20-python"
 		}
 	],

@@ -4,14 +4,14 @@ version = "0.1.0"
 description = ""
 authors = ["Kyle Widmann <Kyle.Widmann@gmail.com>"]
 readme = "README.md"
-packages = [
-    {include = "oanda_client"}
-]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 fx-lib = {git = "https://github.com/kylewidmann/fx-lib.git", rev = "0.1.0"}
-v20 = {git = "https://github.com/kylewidmann/v20-python.git", rev = "0.1.0"}
+pytrade = {path = "libs/PyTrade", develop = true}
+v20 = {path = "libs/v20-python", develop = true}
+autoflake = "^2.3.1"
+types-pyyaml = "^6.0.12.20241230"
 
 
 [tool.poetry.group.dev.dependencies]

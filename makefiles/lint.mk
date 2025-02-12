@@ -1,21 +1,20 @@
 .PHONY: bandit
 bandit: ##@lint Run bandit
 bandit: files ?= ${SERVICE}
-bandit: args ?= --configfile=bandit.yaml
 bandit:
-	${DC} run --rm --no-deps bandit -r ${files} ${args}
+	${DC} run --rm --no-deps bandit -r ${files}
 
 .PHONY: black
 black: ##@lint Run black
 black: files ?= ${SERVICE} tests
 black:
-	${DC} run --rm --no-deps black -r ${files}
+	${DC} run --rm --no-deps black ${files}
 
 .PHONY: flake8
 flake8: ##@lint Run flake8
 flake8: files ?= ${SERVICE} tests
 flake8:
-	${DC} run --rm --no-deps falke8 --config .flake8 ${files}
+	${DC} run --rm --no-deps flake8 --config .flake8 ${files}
 
 .PHONY: isort
 isort: ##@lint Run isort
