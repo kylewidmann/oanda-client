@@ -435,24 +435,6 @@ pycodestyle = ">=2.11.0,<2.12.0"
 pyflakes = ">=3.2.0,<3.3.0"
 
 [[package]]
-name = "fx-lib"
-version = "0.1.0"
-description = ""
-optional = false
-python-versions = "^3.10"
-files = []
-develop = false
-
-[package.dependencies]
-pytest = "^8.1.1"
-
-[package.source]
-type = "git"
-url = "https://github.com/kylewidmann/fx-lib.git"
-reference = "0.1.0"
-resolved_reference = "51b25f113cdae76c2e28ff9f5bbaa1cb1d9eafbf"
-
-[[package]]
 name = "idna"
 version = "3.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -1088,7 +1070,7 @@ description = ""
 optional = false
 python-versions = "^3.10"
 files = []
-develop = true
+develop = false
 
 [package.dependencies]
 autoflake = "^2.3.1"
@@ -1100,8 +1082,10 @@ pandas-stubs = "^2.2.2.240603"
 pytest = "^8.1.1"
 
 [package.source]
-type = "directory"
-url = "libs/PyTrade"
+type = "git"
+url = "https://github.com/kylewidmann/PyTrade/"
+reference = "v1.0.0"
+resolved_reference = "632c325e23c474b1bb0bd573d5448bb597509d3a"
 
 [[package]]
 name = "pytz"
@@ -1424,15 +1408,17 @@ description = ""
 optional = false
 python-versions = "^3.10"
 files = []
-develop = true
+develop = false
 
 [package.dependencies]
 requests = "^2.32.3"
 ujson = "^5.10.0"
 
 [package.source]
-type = "directory"
-url = "libs/v20-python"
+type = "git"
+url = "https://github.com/kylewidmann/v20-python/"
+reference = "oanda"
+resolved_reference = "56f7d5292e2b8ac8cbe5b3e2e4a44ee4f10ac899"
 
 [[package]]
 name = "xyzservices"
@@ -1448,4 +1434,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "5865e0f0fc5ea777718e57d019c1e4d5e7dbfdd68692b3355c7a93a5c8d4c0be"
+content-hash = "2a92ea48fd0342e1bea3755eba178b62b82e5394a30a15afae0e6aa6d312d4ab"

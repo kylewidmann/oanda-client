@@ -1,18 +1,11 @@
 {
     "python.defaultInterpreterPath": ".venv/bin/python",
-    "python.testing.unittestArgs": [
-        "-v",
-        "tests/**/test_*.py"
-    ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "debugpy.debugJustMyCode": false,
     "python.terminal.activateEnvironment": true,
     "python.analysis.extraPaths": [
-        "libs/PyTrade",
-        "libs/v20-python"
-    ],
-    "files.exclude": {
-		"libs": true
-    }
+        "../PyTrade",
+        "../v20-python"
+    ]
 }

@@ -1,6 +1,0 @@
-[submodule "libs/PyTrade"]
-	path = libs/PyTrade
-	url = https://github.com/kylewidmann/PyTrade.git
-[submodule "libs/v20-python"]
-	path = libs/v20-python
-	url = https://github.com/kylewidmann/v20-python.git

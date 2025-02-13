@@ -25,7 +25,6 @@ RUN curl -sSL https://install.python-poetry.org | python3 - \
 
 WORKDIR /app/${PROEJCT_DIR}
 COPY ${PROEJCT_DIR}/pyproject.toml ${PROEJCT_DIR}/poetry.lock ./
-COPY libs libs/
 RUN poetry install --only main
 
 ##################################################
