@@ -1,0 +1,26 @@
+name: Run CI make command
+
+on:
+  push:
+    branches:
+    - "*"
+    - "!main"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build
+        working-directory: .
+        run: make ci
