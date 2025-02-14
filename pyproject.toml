@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-pytrade = {git = "https://github.com/kylewidmann/PyTrade/", rev = "v1.0.0"}
+pytrade = {git = "https://github.com/kylewidmann/PyTrade/", rev = "oanda"}
 v20 = {git = "https://github.com/kylewidmann/v20-python/", rev = "oanda"}
 autoflake = "^2.3.1"
 types-pyyaml = "^6.0.12.20241230"
