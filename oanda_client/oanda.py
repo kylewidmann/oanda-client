@@ -51,7 +51,7 @@ class OandaAccount(IAccount):
 
     @property
     def leverage(self) -> float:
-        return self._account.marginRate
+        return 1 / self._account.marginRate
 
 
 class Oanda(IClient):
