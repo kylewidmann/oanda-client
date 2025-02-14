@@ -134,9 +134,9 @@ class Oanda(IClient):
 
         args = {}
         if _position.size > 0:
-            args["longUnits"] = str(_position.size)
+            args["longUnits"] = "ALL"
         elif _position.size < 0:
-            args["shortUnits"] = str(_position.size)
+            args["shortUnits"] = "ALL"
         else:
             raise RuntimeError(f"Requested to close position for {instrument} with size 0.")
 
