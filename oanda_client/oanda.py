@@ -90,8 +90,8 @@ class Oanda(IClient):
         order_args = {
             "instrument": _instrument.value.replace("/", "_"),
             "units": order.size,
-            "takeProfitOnfill": {"price": order.take_profit_on_fill},
-            "stopLossOnFill": {"price": order.stop_loss_on_fill},
+            "takeProfitOnFill": {"price": str(order.take_profit_on_fill)},
+            "stopLossOnFill": {"price": str(order.stop_loss_on_fill)},
         }
         order_request = MarketOrderRequest(**order_args)
         response = self._api.order.create(
