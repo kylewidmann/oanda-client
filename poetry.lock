@@ -1105,7 +1105,7 @@ pytest = "^8.1.1"
 type = "git"
 url = "https://github.com/kylewidmann/PyTrade/"
 reference = "oanda"
-resolved_reference = "ebb22d72d338d12b5c040649377aa7a7f85d3382"
+resolved_reference = "65132224f9cd99724d1c995de7748efcdab25895"
 
 [[package]]
 name = "pytz"
