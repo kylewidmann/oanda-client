@@ -60,7 +60,7 @@ class Oanda(IClient):
 
         if not os.path.exists(os.path.expanduser(config_path)):
             raise RuntimeError(
-                f"Oanda configuraton file does not exist at {config_path}"
+                f"Oanda configuraton file does not exist at {os.path.expanduser(config_path)}"
             )
 
         self._config = Config()
