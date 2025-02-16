@@ -6,7 +6,7 @@ services:
     stdin_open: true
     tty: true
     extends:
-      file: docker-compose.base.yaml
+      file: docker-compose.base.yaml  
       service: base
     entrypoint: ["bash"]
   
@@ -41,6 +41,13 @@ services:
     entrypoint: ["mypy"]
 
   test:
+    volumes:
+      - type: bind
+        source: ~/.v20.conf
+        target: /config/.v20.conf
+    environment:
+      V20_CONFIG: /config/.v20.conf
+    network_mode: "host"
     extends:
       file: docker-compose.base.yaml
       service: base

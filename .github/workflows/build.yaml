@@ -35,7 +35,4 @@ jobs:
           echo "- ${{ secrets.OANDA_ACCOUNT }}" >> ~/.v20.conf
           echo "active_account: ${{ secrets.OANDA_ACCOUNT }}" >> ~/.v20.conf
 
-          ls -al ~
-          pwd
-
           make ci

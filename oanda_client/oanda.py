@@ -21,7 +21,7 @@ from v20.instrument import Candlestick as v20Candlestick
 from v20.order import MarketOrderRequest  # type: ignore
 from v20.position import Position as v20Position
 
-from oanda_client.config import Config
+from oanda_client.config import DEFAULT_PATH, Config
 from oanda_client.events import CandlestickEvent
 from oanda_client.models import Position
 
@@ -56,7 +56,7 @@ class OandaAccount(IAccount):
 
 class Oanda(IClient):
 
-    def __init__(self, config_path: str = "~/.v20.conf"):
+    def __init__(self, config_path: str = os.environ.get("V20_CONFIG", DEFAULT_PATH)):
 
         if not os.path.exists(os.path.expanduser(config_path)):
             raise RuntimeError(
@@ -64,7 +64,7 @@ class Oanda(IClient):
             )
 
         self._config = Config()
-        self._config.load("~/.v20.conf")
+        self._config.load(config_path)
         self._api = self._config.create_context()
         self._stream_api = self._config.create_streaming_context()
         self._candle_events: dict[Tuple[Instrument, Granularity], CandlestickEvent] = (
