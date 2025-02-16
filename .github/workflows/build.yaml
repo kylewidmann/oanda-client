@@ -23,4 +23,16 @@ jobs:
 
       - name: Build
         working-directory: .
-        run: make ci
+        run: |
+          touch ~/.v20.conf
+          echo "hostname: api-fxpractice.oanda.com" >> ~/.v20.conf
+          echo "streaming_hostname: stream-fxpractice.oanda.com" >> ~/.v20.conf
+          echo "port: 443" >> ~/.v20.conf
+          echo "ssl: true" >> ~/.v20.conf
+          echo "token: ${{ secrets.OANDA_TOKEN }}" >> ~/.v20.conf
+          echo "username: ${{ secrets.OANDA_USERNAME }}" >> ~/.v20.conf
+          echo "accounts:" >> ~/.v20.conf
+          echo "- ${{ secrets.OANDA_ACCOUNT }}" >> ~/.v20.conf
+          echo "active_account: ${{ secrets.OANDA_ACCOUNT }}" >> ~/.v20.conf
+
+          make ci
