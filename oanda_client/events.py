@@ -1,35 +1,38 @@
-from typing import Callable, TypeVar, Generic
-from v20.instrument import Candlestick
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from typing import Callable, Generic, TypeVar
 
-T = TypeVar('T')
+from pytrade.instruments import Candlestick
+
+T = TypeVar("T")
+
 
 class Event(Generic[T]):
-     
-    def __init__(self): 
+
+    def __init__(self):
         self.__callbacks: list[Callable[[T], None]] = []
 
     @property
     def _callbacks(self):
         return self.__callbacks
-        
-    def __iadd__(self, callback: Callable[[T], None]): 
-        self.__callbacks.append(callback) 
+
+    def __iadd__(self, callback: Callable[[T], None]):
+        self.__callbacks.append(callback)
         return self
-    
-    def __isub__(self, callback: Callable[[T], None]): 
-        self.__callbacks.remove(callback) 
+
+    def __isub__(self, callback: Callable[[T], None]):
+        self.__callbacks.remove(callback)
         return self
-    
+
     @abstractmethod
     def __call__(self, *args, **kwargs):
         raise NotImplementedError()
-            
+
+
 class CandlestickEvent(Event[Candlestick]):
 
     def __init__(self):
         super().__init__()
-    
+
     def __call__(self, candle: Candlestick):
         for callback in self._callbacks:
             callback(candle)

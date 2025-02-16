@@ -1,9 +1,12 @@
 from __future__ import print_function
-import yaml
+
 import os
 import sys
+
 import v20
-from oanda_client import input
+import yaml
+
+# from oanda_client import input
 
 
 #
@@ -52,6 +55,7 @@ class Config(object):
     Using the Config object enables the scripts to exist without many command
     line arguments (host, token, accountID, etc)
     """
+
     def __init__(self):
         """
         Initialize an empty Config object
@@ -113,7 +117,7 @@ class Config(object):
 
         try:
             with open(os.path.expanduser(path)) as f:
-                y = yaml.load(f, Loader=yaml.FullLoader)
+                y = yaml.safe_load(f)
                 self.hostname = y.get("hostname", self.hostname)
                 self.streaming_hostname = y.get(
                     "streaming_hostname", self.streaming_hostname
@@ -123,12 +127,8 @@ class Config(object):
                 self.username = y.get("username", self.username)
                 self.token = y.get("token", self.token)
                 self.accounts = y.get("accounts", self.accounts)
-                self.active_account = y.get(
-                    "active_account", self.active_account
-                )
-                self.datetime_format = y.get(
-                    "datetime_format", self.datetime_format
-                )
+                self.active_account = y.get("active_account", self.active_account)
+                self.datetime_format = y.get("datetime_format", self.datetime_format)
         except Exception:
             raise ConfigPathError(path)
 
@@ -162,33 +162,22 @@ class Config(object):
         prompts
         """
 
-        environments = [
-            "fxtrade",
-            "fxpractice"
-        ]
+        environments = ["fxtrade", "fxpractice"]
 
-        hostnames = [
-            "api-fxtrade.oanda.com",
-            "api-fxpractice.oanda.com"
-        ]
+        hostnames = ["api-fxtrade.oanda.com", "api-fxpractice.oanda.com"]
 
         streaming_hostnames = [
             "stream-fxtrade.oanda.com",
-            "stream-fxpractice.oanda.com"
+            "stream-fxpractice.oanda.com",
         ]
 
         index = 0
 
-        try:
+        if self.hostname in hostnames:
             index = hostnames.index(self.hostname)
-        except Exception:
-            pass
 
         environment = input.get_from_list(
-            environments,
-            "Available environments:",
-            "Select environment",
-            index
+            environments, "Available environments:", "Select environment", index
         )
 
         index = environments.index(environment)
@@ -197,9 +186,7 @@ class Config(object):
         self.streaming_hostname = streaming_hostnames[index]
 
         print("> API host selected is: {}".format(self.hostname))
-        print(
-            "> Streaming host selected is: {}".format(self.streaming_hostname)
-        )
+        print("> Streaming host selected is: {}".format(self.streaming_hostname))
         print("")
 
         self.username = input.get_string("Enter username", self.username)
@@ -207,25 +194,15 @@ class Config(object):
         print("> username is: {}".format(self.username))
         print("")
 
-        self.token = input.get_string(
-            "Enter personal access token", self.token
-        )
+        self.token = input.get_string("Enter personal access token", self.token)
 
         print("> Using personal access token: {}".format(self.token))
 
-        ctx = v20.Context(
-            self.hostname,
-            self.port,
-            self.ssl
-        )
+        ctx = v20.Context(self.hostname, self.port, self.ssl)
 
         ctx.set_token(self.token)
 
-        ctx_streaming = v20.Context(
-            self.streaming_hostname,
-            self.port,
-            self.ssl
-        )
+        ctx_streaming = v20.Context(self.streaming_hostname, self.port, self.ssl)
 
         ctx_streaming.set_token(self.token)
 
@@ -235,9 +212,7 @@ class Config(object):
             print(response)
             sys.exit()
 
-        self.accounts = [
-            account.id for account in response.body.get("accounts")
-        ]
+        self.accounts = [account.id for account in response.body.get("accounts")]
 
         self.accounts.sort()
 
@@ -247,18 +222,13 @@ class Config(object):
 
         index = 0
 
-        try:
+        if self.active_account in self.accounts:
             index = self.accounts.index(self.active_account)
-        except Exception:
-            pass
 
         print("")
 
         self.active_account = input.get_from_list(
-            self.accounts,
-            "Available Accounts:",
-            "Select Active Account",
-            index
+            self.accounts, "Available Accounts:", "Select Active Account", index
         )
 
         print("> Active Account is: {}".format(self.active_account))
@@ -268,16 +238,11 @@ class Config(object):
 
         index = 0
 
-        try:
+        if self.datetime_format in time_formats:
             index = time_formats.index(self.datetime_format)
-        except Exception:
-            pass
 
         self.datetime_format = input.get_from_list(
-            time_formats,
-            "Available Time Formats:",
-            "Select Time Format",
-            index
+            time_formats, "Available Time Formats:", "Select Time Format", index
         )
 
     def create_context(self):
@@ -290,7 +255,7 @@ class Config(object):
             self.ssl,
             application="sample_code",
             token=self.token,
-            datetime_format=self.datetime_format
+            datetime_format=self.datetime_format,
         )
 
         return ctx
@@ -305,7 +270,7 @@ class Config(object):
             self.ssl,
             application="sample_code",
             token=self.token,
-            datetime_format=self.datetime_format
+            datetime_format=self.datetime_format,
         )
 
         return ctx
@@ -362,9 +327,6 @@ def add_argument(parser):
         type=make_config_instance,
         default=default_config_path(),
         help="The location of the v20 config file to load. "
-             "This defaults to the file set in the ${} "
-             "environment variable, followed by file {}".format(
-                 DEFAULT_ENV,
-                 DEFAULT_PATH
-             )
+        "This defaults to the file set in the ${} "
+        "environment variable, followed by file {}".format(DEFAULT_ENV, DEFAULT_PATH),
     )

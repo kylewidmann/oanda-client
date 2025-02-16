@@ -1,9 +1,9 @@
-FROM python:3.12.2-slim-bookworm as base
+FROM python:3.12.2-slim-bookworm AS base
 
 ENV \
   PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
-  POETRY_VERSION=1.5.1 \
+  POETRY_VERSION=2.0.1 \
   POETRY_VIRTUALENVS_IN_PROJECT=true \
   POETRY_NO_INTERACTION=1 \
   POETRY_HOME="/opt/poetry" \
@@ -25,13 +25,13 @@ RUN curl -sSL https://install.python-poetry.org | python3 - \
 
 WORKDIR /app/${PROEJCT_DIR}
 COPY ${PROEJCT_DIR}/pyproject.toml ${PROEJCT_DIR}/poetry.lock ./
-RUN poetry install --only main
+RUN poetry install --only main --no-root
 
 ##################################################
 ## PRODUCTION ##
 ##################################################
 
-FROM python:3.12.2-slim-bookworm as production
+FROM python:3.12.2-slim-bookworm AS production
 
 ARG PROEJCT_DIR
 
@@ -59,7 +59,7 @@ ENTRYPOINT ["/app/scripts/entrypoint.sh"]
 ## DEVELOPMENT ##
 ##################################################
 
-FROM base as development
+FROM base AS development
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENV APP_USER app
@@ -74,6 +74,7 @@ RUN set -ex \
 WORKDIR /app
 COPY --chown=${APP_USER}:${APP_GROUP} . ./
 RUN poetry install
+RUN chown ${APP_USER}:${APP_GROUP} .
 USER ${APP_USER}
 
 ENTRYPOINT ["/app/scripts/entrypoint.sh"]
