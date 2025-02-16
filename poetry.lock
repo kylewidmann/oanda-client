@@ -455,15 +455,15 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "flake8"
-version = "7.1.1"
+version = "7.1.2"
 description = "the modular source code checker: pep8 pyflakes and co"
 optional = false
 python-versions = ">=3.8.1"
 groups = ["dev"]
 markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
-    {file = "flake8-7.1.1-py2.py3-none-any.whl", hash = "sha256:597477df7860daa5aa0fdd84bf5208a043ab96b8e96ab708770ae0364dd03213"},
-    {file = "flake8-7.1.1.tar.gz", hash = "sha256:049d058491e228e03e67b390f311bbf88fce2dbaa8fa673e7aea87b7198b8d38"},
+    {file = "flake8-7.1.2-py2.py3-none-any.whl", hash = "sha256:1cbc62e65536f65e6d754dfe6f1bada7f5cf392d6f5db3c2b85892466c3e7c1a"},
+    {file = "flake8-7.1.2.tar.gz", hash = "sha256:c586ffd0b41540951ae41af572e6790dbd49fc12b3aa2541685d253d9bd504bd"},
 ]
 
 [package.dependencies]
@@ -1184,8 +1184,8 @@ pytest = "^8.1.1"
 [package.source]
 type = "git"
 url = "https://github.com/kylewidmann/PyTrade/"
-reference = "oanda"
-resolved_reference = "73ef49438d5409ae9fdf25ba0d6023778e1df6d3"
+reference = "v1.0.0"
+resolved_reference = "549a6dbf3048e53075d6519ff6f05773a32b2854"
 
 [[package]]
 name = "pytz"
@@ -1602,8 +1602,8 @@ ujson = "^5.10.0"
 [package.source]
 type = "git"
 url = "https://github.com/kylewidmann/v20-python/"
-reference = "oanda"
-resolved_reference = "56f7d5292e2b8ac8cbe5b3e2e4a44ee4f10ac899"
+reference = "v1.0.0"
+resolved_reference = "032ba258794ee7cce6c029b7f0f8c4c40769f960"
 
 [[package]]
 name = "xyzservices"
@@ -1621,4 +1621,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "75c8736ce4ce5bd75f18f1005db48eb7e5a13b5aa7ab36f708d14511ed1c1b9a"
+content-hash = "e1fd6c425a1d2a9a22ce93f0399096c89f7585e01f859f1653e08ed0d001edb6"

@@ -93,7 +93,9 @@ class Oanda(IClient):
         }
 
         if order.take_profit_on_fill:
-            order_args["takeProfitOnFill"] = {"price": f"{order.take_profit_on_fill:.5f}"}
+            order_args["takeProfitOnFill"] = {
+                "price": f"{order.take_profit_on_fill:.5f}"
+            }
 
         if order.stop_loss_on_fill:
             order_args["stopLossOnFill"] = {"price": f"{order.stop_loss_on_fill:.5f}"}
@@ -138,7 +140,9 @@ class Oanda(IClient):
         elif _position.size < 0:
             args["shortUnits"] = "ALL"
         else:
-            raise RuntimeError(f"Requested to close position for {instrument} with size 0.")
+            raise RuntimeError(
+                f"Requested to close position for {instrument} with size 0."
+            )
 
         response = self._api.position.close(
             self._config.active_account, _instrument.value.replace("/", "_"), **args
