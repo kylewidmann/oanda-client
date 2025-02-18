@@ -1,6 +1,5 @@
 import asyncio
 import os
-import sys
 from abc import abstractmethod
 from datetime import datetime, timezone
 from typing import Callable, Tuple
@@ -15,8 +14,8 @@ from pytrade.instruments import (
 )
 from pytrade.interfaces.account import IAccount
 from pytrade.interfaces.client import IClient
-from pytrade.models import Order
 from pytrade.logging import get_logger
+from pytrade.models import Order
 from v20.account import Account
 from v20.instrument import Candlestick as v20Candlestick
 from v20.order import MarketOrderRequest  # type: ignore
@@ -276,4 +275,6 @@ class Oanda(IClient):
             except asyncio.CancelledError:
                 pass
             except Exception as err:
-                self.logger.error("Exception encountered streaming candles", exc_info=err)
+                self.logger.error(
+                    "Exception encountered streaming candles", exc_info=err
+                )
