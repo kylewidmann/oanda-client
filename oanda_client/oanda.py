@@ -16,6 +16,7 @@ from pytrade.instruments import (
 from pytrade.interfaces.account import IAccount
 from pytrade.interfaces.client import IClient
 from pytrade.models import Order
+from pytrade.logging import get_logger
 from v20.account import Account
 from v20.instrument import Candlestick as v20Candlestick
 from v20.order import MarketOrderRequest  # type: ignore
@@ -71,6 +72,7 @@ class Oanda(IClient):
             dict()
         )
         self._stream_tasks: list[asyncio.Task] = []
+        self.logger = get_logger()
 
     @property
     def account(self) -> IAccount:
@@ -248,30 +250,30 @@ class Oanda(IClient):
         granularity: Granularity,
         callback: Callable[[Candlestick], None],
     ):
-        try:
-            interval = 60 * MINUTES_MAP[granularity]
-            previous_candle = None
-            candle = self.get_candle(instrument, granularity)
-            previous_candle = candle
-            initial_delay = (2 * interval) - (
-                (datetime.now(timezone.utc) - candle.timestamp).seconds
-            )
-            callback(candle)
-            await asyncio.sleep(initial_delay)
-            while True:
+        while True:
+            try:
+                interval = 60 * MINUTES_MAP[granularity]
+                previous_candle = None
                 candle = self.get_candle(instrument, granularity)
-
-                # Handle clase where we grab previous candle again
-                if candle.timestamp == previous_candle.timestamp:
-                    await asyncio.sleep(1)
-                    continue
-
                 previous_candle = candle
+                initial_delay = (2 * interval) - (
+                    (datetime.now(timezone.utc) - candle.timestamp).seconds
+                )
                 callback(candle)
-                await asyncio.sleep(interval)
+                await asyncio.sleep(initial_delay)
+                while True:
+                    candle = self.get_candle(instrument, granularity)
 
-        except asyncio.CancelledError:
-            pass
-        except Exception as err:
-            print(err)
-            sys.exit(1)
+                    # Handle clase where we grab previous candle again
+                    if candle.timestamp == previous_candle.timestamp:
+                        await asyncio.sleep(1)
+                        continue
+
+                    previous_candle = candle
+                    callback(candle)
+                    await asyncio.sleep(interval)
+
+            except asyncio.CancelledError:
+                pass
+            except Exception as err:
+                self.logger.error("Exception encountered streaming candles", exc_info=err)
