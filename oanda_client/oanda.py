@@ -98,8 +98,13 @@ class Oanda(IClient):
                 "price": f"{order.take_profit_on_fill:.5f}"
             }
 
+        if order.stop_loss_on_fill and order.trailing_stop_loss_on_fill:
+            raise RuntimeError(f"Can not supply a stop loss and trailing stop loss. {order.stop_loss_on_fill=} {order.trailing_stop_loss_on_fill=}")
+
         if order.stop_loss_on_fill:
             order_args["stopLossOnFill"] = {"price": f"{order.stop_loss_on_fill:.5f}"}
+        elif order.trailing_stop_loss_on_fill:
+            order_args["trailingStopLossOnFill"] = {"distance": f"{order.trailing_stop_loss_on_fill:.5f}"}
 
         order_request = MarketOrderRequest(**order_args)
         response = self._api.order.create(
