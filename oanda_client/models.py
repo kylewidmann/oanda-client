@@ -5,7 +5,6 @@ from v20.position import PositionSide
 
 
 class Position(IPosition):
-
     def __init__(self, instrument: Instrument, position: v20Position):
         self._instrument = instrument
         self._short: PositionSide = position.short

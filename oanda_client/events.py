@@ -7,7 +7,6 @@ T = TypeVar("T")
 
 
 class Event(Generic[T]):
-
     def __init__(self):
         self.__callbacks: list[Callable[[T], None]] = []
 
@@ -29,7 +28,6 @@ class Event(Generic[T]):
 
 
 class CandlestickEvent(Event[Candlestick]):
-
     def __init__(self):
         super().__init__()
 

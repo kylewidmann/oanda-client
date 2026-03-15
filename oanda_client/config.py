@@ -119,9 +119,7 @@ class Config(object):
             with open(os.path.expanduser(path)) as f:
                 y = yaml.safe_load(f)
                 self.hostname = y.get("hostname", self.hostname)
-                self.streaming_hostname = y.get(
-                    "streaming_hostname", self.streaming_hostname
-                )
+                self.streaming_hostname = y.get("streaming_hostname", self.streaming_hostname)
                 self.port = y.get("port", self.port)
                 self.ssl = y.get("ssl", self.ssl)
                 self.username = y.get("username", self.username)

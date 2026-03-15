@@ -37,7 +37,6 @@ def heartbeat_to_string(heartbeat):
 
 
 class OandaAccount(IAccount):
-
     def __init__(self, v20Account: Account):
         self._account = v20Account
 
@@ -55,9 +54,7 @@ class OandaAccount(IAccount):
 
 
 class Oanda(IClient):
-
     def __init__(self, config_path: str = os.environ.get("V20_CONFIG", DEFAULT_PATH)):
-
         if not os.path.exists(os.path.expanduser(config_path)):
             raise RuntimeError(
                 f"Oanda configuraton file does not exist at {os.path.expanduser(config_path)}"
@@ -67,9 +64,7 @@ class Oanda(IClient):
         self._config.load(config_path)
         self._api = self._config.create_context()
         self._stream_api = self._config.create_streaming_context()
-        self._candle_events: dict[Tuple[Instrument, Granularity], CandlestickEvent] = (
-            dict()
-        )
+        self._candle_events: dict[Tuple[Instrument, Granularity], CandlestickEvent] = dict()
         self._stream_tasks: list[asyncio.Task] = []
         self.logger = get_logger()
 
@@ -80,7 +75,6 @@ class Oanda(IClient):
 
     @abstractmethod
     def order(self, order: Order):
-
         if not isinstance(order.instrument, FxInstrument):
             raise RuntimeError(
                 f"Oanda only supports order for Forex pairs.  Received {order.instrument}"
@@ -94,32 +88,29 @@ class Oanda(IClient):
         }
 
         if order.take_profit_on_fill:
-            order_args["takeProfitOnFill"] = {
-                "price": f"{order.take_profit_on_fill:.5f}"
-            }
+            order_args["takeProfitOnFill"] = {"price": f"{order.take_profit_on_fill:.5f}"}
 
         if order.stop_loss_on_fill and order.trailing_stop_loss_on_fill:
-            raise RuntimeError(f"Can not supply a stop loss and trailing stop loss. {order.stop_loss_on_fill=} {order.trailing_stop_loss_on_fill=}")
+            raise RuntimeError(
+                f"Can not supply a stop loss and trailing stop loss. {order.stop_loss_on_fill=} {order.trailing_stop_loss_on_fill=}"
+            )
 
         if order.stop_loss_on_fill:
             order_args["stopLossOnFill"] = {"price": f"{order.stop_loss_on_fill:.5f}"}
         elif order.trailing_stop_loss_on_fill:
-            order_args["trailingStopLossOnFill"] = {"distance": f"{order.trailing_stop_loss_on_fill:.5f}"}
+            order_args["trailingStopLossOnFill"] = {
+                "distance": f"{order.trailing_stop_loss_on_fill:.5f}"
+            }
 
         order_request = MarketOrderRequest(**order_args)
-        response = self._api.order.create(
-            self._config.active_account, order=order_request
-        )
+        response = self._api.order.create(self._config.active_account, order=order_request)
         if response.body and response.body.get("errorMessage"):
             raise RuntimeError(response.body.get("errorMessage"))
 
     @abstractmethod
     def get_position(self, instrument: Instrument) -> Position:
-
         if isinstance(instrument, str):
-            raise RuntimeError(
-                f"Oanda only support Forex instruments.  Received {instrument}"
-            )
+            raise RuntimeError(f"Oanda only support Forex instruments.  Received {instrument}")
 
         _instrument: FxInstrument = instrument
 
@@ -131,11 +122,8 @@ class Oanda(IClient):
 
     @abstractmethod
     def close_position(self, instrument: Instrument):
-
         if isinstance(instrument, str):
-            raise RuntimeError(
-                f"Oanda only support Forex instruments.  Received {instrument}"
-            )
+            raise RuntimeError(f"Oanda only support Forex instruments.  Received {instrument}")
 
         _instrument: FxInstrument = instrument
         _position = self.get_position(instrument)
@@ -146,9 +134,7 @@ class Oanda(IClient):
         elif _position.size < 0:
             args["shortUnits"] = "ALL"
         else:
-            raise RuntimeError(
-                f"Requested to close position for {instrument} with size 0."
-            )
+            raise RuntimeError(f"Requested to close position for {instrument} with size 0.")
 
         response = self._api.position.close(
             self._config.active_account, _instrument.value.replace("/", "_"), **args
@@ -159,11 +145,8 @@ class Oanda(IClient):
     def get_candles(
         self, instrument: Instrument, granularity: Granularity, count: int
     ) -> list[Candlestick]:
-
         if isinstance(instrument, str):
-            raise RuntimeError(
-                f"Oanda only support Forex instruments.  Received {instrument}"
-            )
+            raise RuntimeError(f"Oanda only support Forex instruments.  Received {instrument}")
 
         _instrument: FxInstrument = instrument
 
@@ -194,14 +177,9 @@ class Oanda(IClient):
         ]
         return candles[-count:]
 
-    def get_candle(
-        self, instrument: Instrument, granularity: Granularity
-    ) -> Candlestick:
-
+    def get_candle(self, instrument: Instrument, granularity: Granularity) -> Candlestick:
         if isinstance(instrument, str):
-            raise RuntimeError(
-                f"Oanda only support Forex instruments.  Received {instrument}"
-            )
+            raise RuntimeError(f"Oanda only support Forex instruments.  Received {instrument}")
 
         _instrument: FxInstrument = instrument
 
@@ -280,6 +258,4 @@ class Oanda(IClient):
             except asyncio.CancelledError:
                 pass
             except Exception as err:
-                self.logger.error(
-                    "Exception encountered streaming candles", exc_info=err
-                )
+                self.logger.error("Exception encountered streaming candles", exc_info=err)
